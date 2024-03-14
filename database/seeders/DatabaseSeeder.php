@@ -22,9 +22,10 @@ class DatabaseSeeder extends Seeder
         /**
          * Crear una carpeta para guardar las imagenes
          */
-
+        Storage::deleteDirectory('posts');
         Storage::makeDirectory('posts');
 
+        $this->call(RoleSeeder::class);
         $this->call(UserSeeder::class);
         Category::factory(4)->create();
         Tag::factory(8)->create();
