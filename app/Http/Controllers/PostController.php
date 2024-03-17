@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
+use App\Http\Resources\PostResource;
 use App\Models\Post;
+use Illuminate\Http\Response;
 
 class PostController extends Controller
 {
@@ -12,63 +14,42 @@ class PostController extends Controller
     {
         $this->middleware('can:create posts');
         $this->middleware('can:edit posts');
-        $this->middleware('can:delet posts');
+        $this->middleware('can:delete posts');
     }
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        $posts = Post::all();
-        return $posts;
+        $posts = Post::included()
+                ->sort()
+                ->filter()
+                ->get();
+
+        return PostResource::collection($posts);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create(StorePostRequest $request)
-    {
-        //
-        
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StorePostRequest $request)
     {
-        //
+        $post = Post::create($request->validated());
+        return response()->json(PostResource::make($post), Response::HTTP_CREATED);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Post $post)
     {
-        //
+        $post = $post->included()->first();
+        return response()->json(PostResource::make($post), Response::HTTP_OK);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Post $post)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdatePostRequest $request, Post $post)
     {
-        //
+        $this->authorize('update', $post);
+        $post = $post->updateOrFail($request->validated());
+        return response()->json(PostResource::make($post), Response::HTTP_OK);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Post $post)
     {
         //
+        $this->authorize('delete', $post);
+        $post->delete();
+        return response()->json(null, Response::HTTP_NO_CONTENT);
     }
 }

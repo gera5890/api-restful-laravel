@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\ApiTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,13 +11,17 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Post extends Model
 {
-    use HasFactory;
-    
+    use HasFactory, ApiTrait;
+
     protected $fillable = [
         'name',
         'slug',
 
     ];
+
+    protected $allowFilter = ['id', 'name', 'slug', 'status', 'extract', 'body'];
+    protected $allowSort = ['id', 'name', 'slug', 'status'];
+    protected $allowIncluded = ['category', 'comments', 'tags'];
 
     /*
     Relacion uno a muchos inversa
