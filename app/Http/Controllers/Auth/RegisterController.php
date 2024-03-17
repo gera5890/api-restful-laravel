@@ -20,7 +20,6 @@ class RegisterController extends Controller
 
         return response()->json([
             'user' => $user,
-            'token' => $user->createToken('api_restful_laravel')->planTextToken
         ], Response::HTTP_CREATED);
     }
 }

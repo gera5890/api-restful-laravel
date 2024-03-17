@@ -10,6 +10,13 @@ use Illuminate\Http\Response;
 
 class CategoryController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->middleware('can:create category');
+        $this->middleware('can:edit category');
+        $this->middleware('can:delete category');
+    }
     /**
      * Display a listing of the resource.
      */
@@ -45,6 +52,7 @@ class CategoryController extends Controller
      */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
+        $this->authorize('update',$category);
         $category->update($request->validated());
         return response()->json(CategoryResource::make($category), Response::HTTP_OK);
     }
@@ -54,6 +62,8 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+
+        $this->authorize('delete',$category);
         $category->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
     }

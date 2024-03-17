@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
@@ -15,12 +14,20 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         //
+        $permissions = [
+            'create post', 'edit post', 'delete post',
+            'create category', 'edit category', 'delete category',
+            'create tag', 'edit tag', 'delet tag',
+            'create comment', 'edit comment', 'delete comment'
+        ];
+        
         $admin = Role::create(['name' => 'admin']);
-
-        $create_post = Permission::create(['name' => 'create posts']);
-        $edit_post = Permission::create(['name' => 'edit posts']);
-        $delete_post = Permission::create(['name' => 'delete posts']);
-
-        $admin->syncPermissions([$create_post, $edit_post, $delete_post]);
+        
+        foreach ($permissions as $permissionName) {
+            Permission::create(['name' => $permissionName]);
+        }
+        
+        $admin->syncPermissions(Permission::all());
+        
     }
 }
