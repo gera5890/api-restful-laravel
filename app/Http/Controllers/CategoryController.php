@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCategoryRequest;
@@ -7,19 +6,18 @@ use App\Http\Requests\UpdateCategoryRequest;
 use App\Http\Resources\CategoryResource;
 use App\Models\Category;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Mockery\Exception;
 
 class CategoryController extends Controller
 {
-
     public function __construct()
     {
         $this->middleware('can:create category');
         $this->middleware('can:edit category');
         $this->middleware('can:delete category');
     }
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         $category = Category::included()
@@ -29,40 +27,61 @@ class CategoryController extends Controller
         return response()->json(CategoryResource::collection($category), Response::HTTP_OK);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(StoreCategoryRequest $request)
     {
-        $category = Category::create($request->validated());
-        return response()->json(CategoryResource::make($category), Response::HTTP_CREATED);
+        DB::beginTransaction();
+        try {
+            $validatedData = $request->validated();
+            $category = new Category([
+                'name' => $validatedData['name'],
+                'slug' => $validatedData['slug'],
+                'user_id' => Auth::user()
+            ]);
+            DB::commit();
+            return response()->json(CategoryResource::make($category), Response::HTTP_CREATED);
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Error al crear categoria',
+                'error' => $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
-
-    /**
-     * Display the specified resource.
-     */
     public function show(Category $category)
     {
         $category = $category->included()->first();
         return response()->json(CategoryResource::make($category), Response::HTTP_OK);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(UpdateCategoryRequest $request, Category $category)
     {
-        $category->update($request->validated());
-        return response()->json(CategoryResource::make($category), Response::HTTP_OK);
+        DB::beginTransaction();
+        try {
+            $category->update($request->validated());
+            DB::commit();
+            return response()->json(CategoryResource::make($category), Response::HTTP_OK);
+        }catch(Exception $e){
+            DB::rollBack();
+            return response()->json([
+                'message' => "Error al actualizar categoria",
+                'error' => $e->getMessage()
+            ]);
+        }
     }
-
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Category $category)
     {
-
-        $category->delete();
-        return response()->json(null, Response::HTTP_NO_CONTENT);
+        DB::beginTransaction();
+        try {
+            $category->delete();
+            DB::commit();
+            return response()->json(null, Response::HTTP_NO_CONTENT);
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response()->json([
+                'message' => "Error al eliminar la categoria",
+                'error' => $e->getMessage()
+            ]);
+        }
     }
+
 }
