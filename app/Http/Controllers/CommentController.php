@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 
 class CommentController extends Controller
@@ -13,15 +14,12 @@ class CommentController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $comments = Comment::included()
+                                ->filter()
+                                ->sort()
+                                ->get();
+        
+        return CommentResource::collection($comments);
     }
 
     /**

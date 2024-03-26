@@ -35,7 +35,7 @@ class CategoryController extends Controller
             $category = new Category([
                 'name' => $validatedData['name'],
                 'slug' => $validatedData['slug'],
-                'user_id' => Auth::user()
+                'user_id' => Auth::user()->id
             ]);
             DB::commit();
             return response()->json(CategoryResource::make($category), Response::HTTP_CREATED);

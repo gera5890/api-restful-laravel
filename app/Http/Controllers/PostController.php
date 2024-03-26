@@ -47,7 +47,6 @@ class PostController extends Controller
 
     public function destroy(Post $post)
     {
-        //
         $this->authorize('delete', $post);
         $post->delete();
         return response()->json(null, Response::HTTP_NO_CONTENT);
